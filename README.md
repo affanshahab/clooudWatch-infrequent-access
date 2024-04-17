@@ -3,7 +3,7 @@ Explore the new AWS CloudWatch Infrequent Access with AWS CloudFormation or SAM
 
 Here is how you can define a newly launched [AWS CloudWatch Infrequent Access](https://aws.amazon.com/blogs/aws/new-amazon-cloudwatch-log-class-for-infrequent-access-logs-at-a-reduced-price/) class log group with AWS CloudFormation and AWS SAM. 
 
-Read the detail in this [LinkedIn Article]()
+Read the detail in this [LinkedIn Article](https://www.linkedin.com/pulse/aws-cloudwatch-infrequent-access-lambda-serverless-save-affan-shahab-zylxc/)
 
 ## How to use this?
 
