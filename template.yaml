@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  EnvType:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+Conditions:
+  IsProd: !Equals [ !Ref EnvType, prod ]
+
+Globals:
+  Function:
+    Runtime: nodejs16.x
+    AutoPublishAlias: live
+    Timeout: 180
+    MemorySize: 256
+    Tracing : 'Active'  
+Resources:
+  NiceJob:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src/job
+      Handler: nice-job.handler
+      Runtime: nodejs16.x
+      Timeout: 30
+      Policies:
+       - AWSLambdaExecute
+      Role:
+        Fn::GetAtt:
+          - NiceJobLambdaExecRole
+          - Arn       
+      LoggingConfig:
+        LogGroup: !Ref NiceJobLogGroup
+  NiceJobLambdaExecRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: NiceJobLambdaLogging
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt NiceJobLogGroup.Arn
+  NiceJobLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/${EnvType}-NiceJob"
+        LogGroupClass: !If [IsProd, INFREQUENT_ACCESS, STANDARD]
+  NiceWork:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src/work
+      Handler: nice-work.handler
+      Timeout: 30
+      MemorySize: 128
+      Policies:
+       - AWSLambdaExecute
+      Role:
+        Fn::GetAtt:
+          - NiceWorkLambdaExecRole
+          - Arn
+      LoggingConfig:
+        LogGroup: !Ref NiceWorkLogGroup                 
+  NiceWorkLambdaExecRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: NiceWorkLambdaLogging
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt NiceWorkLogGroup.Arn
+  NiceWorkLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Sub "/aws/lambda/${AWS::StackName}/${EnvType}-NiceWork"
+        LogGroupClass: INFREQUENT_ACCESS
+Outputs:
+  NiceJobArn:
+    Description: Arn of lambda NiceJob
+    Value: !Sub ${NiceJob.Version}
+  NiceWorkArn:
+    Description: Arn of lambda NiceWork
+    Value: !Sub ${NiceWork.Version}

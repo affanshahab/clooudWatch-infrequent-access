@@ -1,0 +1,14 @@
+{
+  "name": "clooudWatch-infrequent-access",
+  "version": "1.0.0",
+  "description": "CloudWatch Infrequent Access",
+  "main": "index.js",
+    "scripts": {
+    },
+    "dependencies": {
+      "moment": "2.29.1"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+  
